@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+    <title>Exercício do Pássaro</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <script>
+        // Averigua se o usuário realmente quer ver o exercício do pássaro.
+        var resposta = false;
+        while (!resposta) {
+            resposta = window.confirm('Você realmente que ver o pássaro?');
+        }
+
+        //Salva as configurações básicas do jogo.
+        var config = {
+            type: Phaser.AUTO,
+            width: 800,
+            height: 600,
+
+            scene: {
+                preload: preload,
+                create: create,
+                update: update
+            }
+        };
+
+        var game = new Phaser.Game(config);
+        var red;
+
+        //Carrega os elementos do jogo.
+        function preload() {
+            this.load.image('bg', 'assets/bg_space.png')
+            this.load.spritesheet('bird', 'assets/red-bird.png', { frameWidth: 75, frameHeight: 75 });
+        }
+
+        //Coloca na tela os elementos previamente carregados.
+        function create() {
+            this.add.image(400, 300, 'bg').setScale(1.2);
+            red = this.add.sprite(100, 500, 'bird').setScale(1.3);
+
+            this.anims.create({
+                key: 'fly',
+                frames: this.anims.generateFrameNumbers('bird', { start: 0, end: 7 }),
+                frameRate: 10,
+                repeat: -1
+            });
+
+            red.anims.play('fly', true)
+        }
+
+        //Atualiza continuamente as ações dentro do jogo.
+        function update() {
+
+            // Identifica o ponto em que o pássaro se encontra e determina que ele está no sentido de "ida".
+            if (red.x == 100) {
+                red.setFlip(false, false); // Determina a sentido que o pássaro está (neste caso, direita).
+                red.ida = true; // Determina que o pássaro está no sentido de "ida".
+                red.posy = red.y; // Guarda a posição em y do pássaro neste exato instante.
+            }
+
+            // Faz com que o pássaro ande para a direita caso ele esteja na ida.
+            if (red.x < 700 && red.ida === true) {
+                console.log('Incrementa a coordenada em x do pássaro em 5, fazendo com que ele se locomova para a direita');
+                red.x += 5;
+
+                // Modifica a posição em y do pássaro com base em funções matemáticas, fazendo com que ele se locomova de modo a formar uma espécie de "onda" subindo, caso ele esteja abaixo da coordenada 300, ou descendo, caso ele esteja acima ou sobre a coordenada 300, sempre na "ida".
+                if (red.posy >= 300) {
+                    red.y = 30 * Math.sin(0.08 * (-red.x / 2.5 + red.posy)) + (-red.x / 2.5 + red.posy);
+                } else {
+                    red.y = 30 * Math.sin(0.07 * (red.x / 2.5 + red.posy)) + (red.x / 2.5 + red.posy);
+                }
+            }
+
+            // Identifica o ponto em que o pássaro se encontra e determina que ele está no sentido de "volta".
+            if (red.x == 700) {
+                red.setFlip(true, false); // Determina a sentido que o pássaro está (neste caso, esquerda).
+                red.ida = false; // Determina que o pássaro está no sentido de "ida".
+                red.posy = red.y; // Guarda a posição em y do pássaro neste exato instante.
+            }
+
+            if (red.x > 100 && red.ida == false) {
+                console.log('Decrementa a coordenada em x do pássaro em 5, fazendo com que ele se locomova para a esquerda');
+                red.x -= 5;
+                red.y = 30 * (Math.sin(0.03 * red.x)) + red.posy; // Altera a posição em y do pássaro com base em uma função senoidal, dando um aspecto que a ave voa formando uma "onda".
+            }
+
+        }
+    </script>
+
+</body>
+
+</html>
